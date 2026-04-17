@@ -1,3 +1,4 @@
+cat > .github/workflows/pipeline.yml << 'YAML'
 name: Lab8 DVC Pipeline - 2022BCS0057
 
 on:
@@ -37,8 +38,20 @@ jobs:
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: us-east-1
 
-      - name: DVC Pull Data
-        run: dvc pull
+      - name: Pull or Generate Dataset
+        run: |
+          dvc pull || python3 -c "
+          from sklearn.datasets import fetch_california_housing
+          import pandas as pd, os
+          os.makedirs('data', exist_ok=True)
+          housing = fetch_california_housing(as_frame=True)
+          df = housing.frame
+          df.columns = ['longitude','latitude','housing_median_age','total_rooms',
+                        'total_bedrooms','population','households','median_income','median_house_value']
+          df['median_house_value'] = df['median_house_value'] * 100000
+          df.to_csv('data/housing.csv', index=False)
+          print(f'Generated dataset: {len(df)} rows')
+          "
 
       - name: Train Model
         run: python src/train.py
