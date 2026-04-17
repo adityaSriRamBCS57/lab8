@@ -26,30 +26,21 @@ jobs:
       - name: Install Dependencies
         run: |
           pip install --upgrade pip
-          pip install "pathspec<0.12"
-          pip install dvc dvc-s3 scikit-learn pandas numpy joblib
+          pip install scikit-learn pandas numpy joblib fastapi uvicorn
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-          aws-region: us-east-1
-
-      - name: Pull or Generate Dataset
+      - name: Generate Dataset V1
         run: |
-          dvc pull || python3 -c "
+          mkdir -p data
+          python3 -c "
           from sklearn.datasets import fetch_california_housing
           import pandas as pd, os
-          os.makedirs('data', exist_ok=True)
           housing = fetch_california_housing(as_frame=True)
           df = housing.frame
           df.columns = ['longitude','latitude','housing_median_age','total_rooms',
                         'total_bedrooms','population','households','median_income','median_house_value']
           df['median_house_value'] = df['median_house_value'] * 100000
-          df.to_csv('data/housing.csv', index=False)
-          print(f'Generated dataset: {len(df)} rows')
+          df.iloc[:5000].to_csv('data/housing.csv', index=False)
+          print(f'Dataset V1: {len(df.iloc[:5000])} rows')
           "
 
       - name: Train Model
@@ -58,7 +49,7 @@ jobs:
       - name: Show Metrics Summary
         run: |
           echo "## 2022BCS0057 - Aditya Sri Ram" >> $GITHUB_STEP_SUMMARY
-          echo "### Training Results" >> $GITHUB_STEP_SUMMARY
+          echo "### Training Results - Dataset V1 (5000 rows)" >> $GITHUB_STEP_SUMMARY
           echo '```json' >> $GITHUB_STEP_SUMMARY
           cat metrics.json >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
@@ -77,7 +68,6 @@ jobs:
 
       - name: Build and Push Docker Image
         run: |
+          mkdir -p models
           docker build -t ${{ env.DOCKER_IMAGE }}:latest .
           docker push ${{ env.DOCKER_IMAGE }}:latest
-
-          
