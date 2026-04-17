@@ -1,0 +1,7 @@
+data/housing.csv
+models/
+__pycache__/
+*.pyc
+.env
+venv/
+metrics.json
