@@ -39,8 +39,8 @@ jobs:
           df.columns = ['longitude','latitude','housing_median_age','total_rooms',
                         'total_bedrooms','population','households','median_income','median_house_value']
           df['median_house_value'] = df['median_house_value'] * 100000
-          df.iloc[:5000].to_csv('data/housing.csv', index=False)
-          print(f'Dataset V1: {len(df.iloc[:5000])} rows')
+          df.to_csv('data/housing.csv', index=False)
+          print(f'Dataset V2: {len(df)} rows')
           "
 
       - name: Train Model
@@ -49,7 +49,7 @@ jobs:
       - name: Show Metrics Summary
         run: |
           echo "## 2022BCS0057 - Aditya Sri Ram" >> $GITHUB_STEP_SUMMARY
-          echo "### Training Results - Dataset V1 (5000 rows)" >> $GITHUB_STEP_SUMMARY
+          echo "### Training Results - Dataset V2 (20640 rows)" >> $GITHUB_STEP_SUMMARY
           echo '```json' >> $GITHUB_STEP_SUMMARY
           cat metrics.json >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
