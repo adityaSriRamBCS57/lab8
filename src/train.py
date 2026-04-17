@@ -17,7 +17,7 @@ print(f"[{ROLL_NO}] Dataset size: {len(data)} rows")
 # Drop rows with missing values
 data = data.dropna()
 
-# Encode ocean_proximity if present
+# Encode ocean_proximity if presen
 if "ocean_proximity" in data.columns:
     data = pd.get_dummies(data, columns=["ocean_proximity"])
 
